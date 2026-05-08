@@ -4,13 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Performance Benchmark</title>
+    <title>Benchmark Arena</title>
+    <link rel="icon" type="image/jpeg" href="BenchmarkArena.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tiktoken-node@0.0.6/dist/tiktoken.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .chat-message {
@@ -140,14 +139,171 @@
         .markdown-content th {
             background-color: #f7fafc;
         }
+
+        /* ── Theme toggle pill ─────────────────────────────────────── */
+        #theme-toggle {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #fbbf24, #f97316);
+            border: none;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.4s ease, box-shadow 0.4s ease;
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+        }
+        #theme-toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #f97316;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+        }
+        body.dark #theme-toggle {
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            box-shadow: 0 0 14px rgba(139, 92, 246, 0.6);
+        }
+        body.dark #theme-toggle-knob {
+            transform: translateX(24px);
+            color: #7c3aed;
+        }
+
+        /* ── Global transition for smooth theme switching ───────────── */
+        *, *::before, *::after {
+            transition: background-color 0.3s ease, border-color 0.3s ease,
+                        color 0.3s ease, box-shadow 0.3s ease;
+        }
+        /* Don't animate layout-affecting props */
+        .progress-bar { transition: width 0.3s ease-in-out !important; }
+
+        /* ── Dark theme overrides ───────────────────────────────────── */
+        body.dark {
+            background-color: #0b0b18;
+            color: #e2e8f0;
+        }
+        body.dark header {
+            background-color: #11111f !important;
+            border-bottom: 1px solid #2a2a4a;
+            box-shadow: 0 1px 24px rgba(124, 58, 237, 0.12) !important;
+        }
+        body.dark h1.text-gray-900 { color: #f1f5f9 !important; }
+
+        /* Cards */
+        body.dark .bg-white {
+            background-color: #16162a !important;
+            border: 1px solid #2a2a4a;
+        }
+        body.dark .shadow, body.dark .shadow-sm {
+            box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.07) !important;
+        }
+
+        /* Page & section backgrounds */
+        body.dark .bg-gray-50  { background-color: #0b0b18 !important; }
+        body.dark .bg-gray-100 { background-color: #1a1a30 !important; }
+        body.dark .bg-gray-200 { background-color: #252540 !important; color: #cbd5e1 !important; }
+        body.dark .hover\:bg-gray-300:hover { background-color: #30305a !important; }
+
+        /* Example prompt chips */
+        body.dark .bg-gray-100.hover\:bg-gray-200 { background-color: #1e1e38 !important; color: #a5b4fc !important; }
+        body.dark .example-prompt { background-color: #1e1e38 !important; color: #a5b4fc !important; }
+        body.dark .example-prompt:hover { background-color: #2a2a50 !important; }
+
+        /* Text */
+        body.dark .text-gray-900 { color: #f1f5f9 !important; }
+        body.dark .text-gray-800 { color: #e2e8f0 !important; }
+        body.dark .text-gray-700 { color: #cbd5e1 !important; }
+        body.dark .text-gray-600 { color: #94a3b8 !important; }
+        body.dark .text-gray-500 { color: #64748b !important; }
+
+        /* Borders */
+        body.dark .border-gray-200 { border-color: #2a2a4a !important; }
+        body.dark .border-gray-300 { border-color: #38385e !important; }
+
+        /* Inputs & textarea */
+        body.dark input[type="text"],
+        body.dark input[type="number"],
+        body.dark textarea {
+            background-color: #11111f !important;
+            color: #e2e8f0 !important;
+            border-color: #38385e !important;
+        }
+        body.dark input::placeholder,
+        body.dark textarea::placeholder { color: #3a3a5e !important; }
+
+        /* Stat cards */
+        body.dark .bg-green-50  { background-color: #0a1f12 !important; border-color: #14402a !important; }
+        body.dark .text-green-800 { color: #6ee7b7 !important; }
+        body.dark .text-green-900 { color: #a7f3d0 !important; }
+        body.dark .text-green-600 { color: #34d399 !important; }
+
+        body.dark .bg-yellow-50  { background-color: #1a1400 !important; border-color: #3a2e00 !important; }
+        body.dark .text-yellow-800 { color: #fde68a !important; }
+        body.dark .text-yellow-900 { color: #fef3c7 !important; }
+        body.dark .text-yellow-600 { color: #fbbf24 !important; }
+
+        body.dark .bg-blue-50  { background-color: #080f2a !important; border-color: #1a2055 !important; }
+        body.dark .text-blue-800 { color: #93c5fd !important; }
+        body.dark .text-blue-900 { color: #bfdbfe !important; }
+        body.dark .text-blue-600 { color: #60a5fa !important; }
+
+        /* Quantized purple stat area */
+        body.dark .bg-purple-50  { background-color: #130a22 !important; border-color: #3b1571 !important; }
+        body.dark .text-purple-500 { color: #a78bfa !important; }
+
+        /* Baseline chat bg */
+        body.dark #baseline-chat  { background-color: #0f0f1e !important; }
+
+        /* Quantized panel: glowing purple border */
+        body.dark #quantized-chat { background-color: #0e0816 !important; }
+        body.dark .bg-purple-900 {
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.3) inset !important;
+        }
+
+        /* Setup modal */
+        body.dark #setup-modal > div {
+            background-color: #16162a !important;
+            border-color: #2a2a4a !important;
+        }
+        body.dark #setup-modal .text-gray-900 { color: #f1f5f9 !important; }
+        body.dark #setup-modal .text-gray-700 { color: #cbd5e1 !important; }
+
+        /* Markdown in dark mode */
+        body.dark .markdown-content code { background-color: rgba(255,255,255,0.08); }
+        body.dark .markdown-content pre  { background-color: rgba(255,255,255,0.05); }
+        body.dark .markdown-content blockquote { border-color: #38385e; color: #94a3b8; }
+        body.dark .markdown-content th { background-color: #1e1e38; }
+        body.dark .markdown-content th,
+        body.dark .markdown-content td { border-color: #2a2a4a; }
+
+        /* Message bubbles */
+        body.dark .bg-gray-200.text-gray-800 {
+            background-color: #252540 !important;
+            color: #e2e8f0 !important;
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 min-h-screen flex flex-col">
     <header class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:px-8 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-gray-900">LLM Performance Benchmark</h1>
-            <div class="flex space-x-2">
+            <div class="flex items-center space-x-2">
+                <img src="BenchmarkArena.jpg" alt="Benchmark Arena" class="w-9 h-9 rounded-lg object-cover">
+                <h1 class="text-xl font-bold text-gray-900">Benchmark Arena</h1>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="connect-btn"
+                    class="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-sm">
+                    <i class="fas fa-plug mr-1"></i>Connect
+                </button>
                 <button id="reset-btn"
                     class="px-3 py-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition text-sm">
                     <i class="fas fa-redo mr-1"></i>Clear
@@ -156,9 +312,10 @@
                     class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm">
                     <i class="fas fa-cog mr-1"></i>Setup
                 </button>
-                <button id="history-btn"
-                    class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm">
-                    <i class="fas fa-history mr-1"></i>History
+                <button id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+                    <span id="theme-toggle-knob">
+                        <i id="theme-icon" class="fas fa-sun"></i>
+                    </span>
                 </button>
             </div>
         </div>
@@ -231,33 +388,33 @@
 
             <!-- Quantized Model -->
             <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="bg-red-800 text-white px-4 py-3 flex justify-between items-center">
+                <div class="bg-purple-900 text-white px-4 py-3 flex justify-between items-center">
                     <div>
                         <span id="quantized-model-name" class="font-medium">Quantized Model</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <span id="quantized-status"
-                            class="text-xs px-2 py-1 rounded-full bg-red-600">Disconnected</span>
+                            class="text-xs px-2 py-1 rounded-full bg-purple-600">Disconnected</span>
                     </div>
                 </div>
-                <div id="quantized-chat" class="h-96 overflow-y-auto p-4 space-y-4 bg-red-40">
-                    <div class="text-center text-red-500 py-10">
+                <div id="quantized-chat" class="h-96 overflow-y-auto p-4 space-y-4 bg-purple-50">
+                    <div class="text-center text-purple-500 py-10">
                         <i class="fas fa-bolt text-4xl mb-2"></i>
                         <p>Connect to quantized model to start benchmarking</p>
                     </div>
                 </div>
-                <div class="bg-red-50 px-4 py-2 border-t border-red-200">
+                <div class="bg-purple-50 px-4 py-2 border-t border-purple-200">
                     <div class="grid grid-cols-3 gap-2 text-xs">
                         <div>
-                            <div class="text-red-500">TTFT</div>
+                            <div class="text-purple-500">TTFT</div>
                             <div id="quantized-ttft" class="font-medium">- ms</div>
                         </div>
                         <div>
-                            <div class="text-red-500">ITL</div>
+                            <div class="text-purple-500">ITL</div>
                             <div id="quantized-itl" class="font-medium">- ms</div>
                         </div>
                         <div>
-                            <div class="text-red-500">Throughput</div>
+                            <div class="text-purple-500">Throughput</div>
                             <div id="quantized-throughput" class="font-medium">- t/s</div>
                         </div>
                     </div>
@@ -398,8 +555,8 @@
         let tokenizer = null;
         async function initTokenizer() {
             try {
-                // Default to cl100k_base which is used by most recent models
-                tokenizer = await tiktoken.get_encoding("cl100k_base");
+                const { get_encoding } = await import("https://esm.sh/tiktoken@1.0.15");
+                tokenizer = get_encoding("cl100k_base");
             } catch (error) {
                 console.error('Failed to initialize tokenizer:', error);
             }
@@ -422,7 +579,6 @@
         // DOM elements
         const sendBtn = document.getElementById('send-btn');
         const resetBtn = document.getElementById('reset-btn');
-        const historyBtn = document.getElementById('history-btn');
         const userInput = document.getElementById('user-input');
         const baselineChat = document.getElementById('baseline-chat');
         const quantizedChat = document.getElementById('quantized-chat');
@@ -449,15 +605,15 @@
                         {
                             label: 'Baseline',
                             data: [0, 0, 0],
-                            backgroundColor: 'rgba(71, 71, 71, 0.6)',
-                            borderColor: 'rgba(71, 71, 71, 1)',
+                            backgroundColor: 'rgba(55, 65, 81, 1)',
+                            borderColor: 'rgba(17, 24, 39, 1)',
                             borderWidth: 1
                         },
                         {
                             label: 'Quantized',
                             data: [0, 0, 0],
-                            backgroundColor: 'rgba(238, 0, 0, 0.6)',
-                            borderColor: 'rgba(238, 0, 0, 1)',
+                            backgroundColor: 'rgba(126, 34, 206, 1)',
+                            borderColor: 'rgba(88, 28, 135, 1)',
                             borderWidth: 1
                         }
                     ]
@@ -524,7 +680,7 @@
                                 }
                             },
                             color: function (context) {
-                                return context.datasetIndex === 0 ? 'rgb(71, 71, 71)' : 'rgb(238, 0, 0)';
+                                return context.datasetIndex === 0 ? 'rgb(71, 71, 71)' : 'rgb(107, 33, 168)';
                             },
                             font: {
                                 weight: 'bold',
@@ -550,22 +706,60 @@
 
             try {
                 // Connect to baseline model
-                const baselineResponse = await fetch(`${baselineUrl}/models`);
+                console.log(`[baseline] Fetching ${baselineUrl}/models ...`);
+                let baselineResponse;
+                try {
+                    baselineResponse = await fetch(`${baselineUrl}/models`);
+                } catch (fetchErr) {
+                    console.error(`[baseline] fetch() threw (likely CORS or network):`, fetchErr);
+                    throw fetchErr;
+                }
+                console.log(`[baseline] HTTP ${baselineResponse.status} ${baselineResponse.statusText}`);
+                console.log(`[baseline] Response headers:`, Object.fromEntries(baselineResponse.headers.entries()));
+                if (!baselineResponse.ok) {
+                    const body = await baselineResponse.text();
+                    console.error(`[baseline] Non-OK body:`, body);
+                    throw new Error(`Baseline responded ${baselineResponse.status}: ${body}`);
+                }
                 const baselineData = await baselineResponse.json();
+                console.log(`[baseline] Parsed JSON:`, baselineData);
+                if (!baselineData.data || !baselineData.data[0]) {
+                    throw new Error(`Baseline JSON missing data[0]: ${JSON.stringify(baselineData)}`);
+                }
                 baselineStats.model = baselineData.data[0].id;
                 baselineStats.size = baselineData.data[0].size || 'Unknown';
                 baselineStats.connected = true;
+                console.log(`[baseline] Connected as model: ${baselineStats.model}`);
 
                 document.getElementById('baseline-model-name').textContent = baselineStats.model;
                 document.getElementById('baseline-status').textContent = 'Connected';
                 document.getElementById('baseline-status').className = 'text-xs px-2 py-1 rounded-full bg-green-600';
 
                 // Connect to quantized model
-                const quantizedResponse = await fetch(`${quantizedUrl}/models`);
+                console.log(`[quantized] Fetching ${quantizedUrl}/models ...`);
+                let quantizedResponse;
+                try {
+                    quantizedResponse = await fetch(`${quantizedUrl}/models`);
+                } catch (fetchErr) {
+                    console.error(`[quantized] fetch() threw (likely CORS or network):`, fetchErr);
+                    throw fetchErr;
+                }
+                console.log(`[quantized] HTTP ${quantizedResponse.status} ${quantizedResponse.statusText}`);
+                console.log(`[quantized] Response headers:`, Object.fromEntries(quantizedResponse.headers.entries()));
+                if (!quantizedResponse.ok) {
+                    const body = await quantizedResponse.text();
+                    console.error(`[quantized] Non-OK body:`, body);
+                    throw new Error(`Quantized responded ${quantizedResponse.status}: ${body}`);
+                }
                 const quantizedData = await quantizedResponse.json();
+                console.log(`[quantized] Parsed JSON:`, quantizedData);
+                if (!quantizedData.data || !quantizedData.data[0]) {
+                    throw new Error(`Quantized JSON missing data[0]: ${JSON.stringify(quantizedData)}`);
+                }
                 quantizedStats.model = quantizedData.data[0].id;
                 quantizedStats.size = quantizedData.data[0].size || 'Unknown';
                 quantizedStats.connected = true;
+                console.log(`[quantized] Connected as model: ${quantizedStats.model}`);
 
                 document.getElementById('quantized-model-name').textContent = quantizedStats.model;
                 document.getElementById('quantized-status').textContent = 'Connected';
@@ -575,25 +769,27 @@
                 baselineChat.innerHTML = '';
                 quantizedChat.innerHTML = '';
 
-                // Enable send button
+                // Enable send button, hide connect button
                 sendBtn.disabled = false;
+                document.getElementById('connect-btn').style.display = 'none';
 
                 // Update summary
                 updateSummaryStats();
             } catch (error) {
-                console.error('Error connecting to models:', error);
-                alert('Error connecting to models. Please check the URLs and try again.');
+                console.error('connectToModels failed:', error);
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                alert(`Error connecting to models:\n\n${error.message}\n\nCheck the browser console for details.`);
 
-                // Reset connection status if error occurs
-                // Consider adding UI feedback here if needed
                 baselineStats.connected = false;
                 quantizedStats.connected = false;
-                sendBtn.disabled = true; // Disable send if connection failed
-                // Update status indicators if needed
+                sendBtn.disabled = true;
+                document.getElementById('connect-btn').style.display = '';
                 document.getElementById('baseline-status').textContent = 'Error';
-                document.getElementById('baseline-status').className = 'text-xs px-2 py-1 rounded-full bg-red-600';
+                document.getElementById('baseline-status').className = 'text-xs px-2 py-1 rounded-full bg-purple-600';
                 document.getElementById('quantized-status').textContent = 'Error';
-                document.getElementById('quantized-status').className = 'text-xs px-2 py-1 rounded-full bg-red-600';
+                document.getElementById('quantized-status').className = 'text-xs px-2 py-1 rounded-full bg-purple-600';
             }
         }
 
@@ -1004,11 +1200,11 @@
 
             document.getElementById('quantized-model-name').textContent = 'Quantized Model';
             document.getElementById('quantized-status').textContent = 'Disconnected';
-            document.getElementById('quantized-status').className = 'text-xs px-2 py-1 rounded-full bg-red-600';
+            document.getElementById('quantized-status').className = 'text-xs px-2 py-1 rounded-full bg-purple-600';
             document.getElementById('quantized-ttft').textContent = '- ms';
             document.getElementById('quantized-itl').textContent = '- ms';
             document.getElementById('quantized-throughput').textContent = '- t/s';
-            quantizedChat.innerHTML = '<div class="text-center text-red-500 py-10"><i class="fas fa-bolt text-4xl mb-2"></i><p>Connect to quantized model to start benchmarking</p></div>';
+            quantizedChat.innerHTML = '<div class="text-center text-purple-500 py-10"><i class="fas fa-bolt text-4xl mb-2"></i><p>Connect to quantized model to start benchmarking</p></div>';
 
             document.getElementById('speed-improvement').textContent = '-';
             document.getElementById('e2e-latency-speedup').textContent = '-';
@@ -1018,6 +1214,7 @@
 
             sendBtn.disabled = true;
             sendBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send';
+            document.getElementById('connect-btn').style.display = '';
 
             // Reset chart
             if (performanceChart) {
@@ -1027,15 +1224,10 @@
             }
         }
 
-        // Show history
-        function showHistory() {
-            alert('History feature would show previous benchmark results here.');
-            // In a real implementation, this would show a modal with previous test results
-        }
 
         // Wait for the DOM to be fully loaded before setting up event listeners
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initTokenizer();
+        document.addEventListener('DOMContentLoaded', () => {
+            initTokenizer(); // fire-and-forget; getTokenCount() falls back gracefully if not ready
             initPerformanceChart();
 
             // Setup modal functionality
@@ -1087,7 +1279,7 @@
             // Other event listeners that depend on DOM elements
             sendBtn.addEventListener('click', sendMessage);
             resetBtn.addEventListener('click', resetApplication);
-            historyBtn.addEventListener('click', showHistory);
+            document.getElementById('connect-btn').addEventListener('click', connectToModels);
             userInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -1129,6 +1321,25 @@
                 // Set initial value on load
                 temperatureValueDisplay.textContent = temperatureInput.value;
             }
+
+            // Dark mode toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('ba-theme');
+
+            function applyTheme(dark) {
+                document.body.classList.toggle('dark', dark);
+                themeIcon.className = dark ? 'fas fa-moon' : 'fas fa-sun';
+                localStorage.setItem('ba-theme', dark ? 'dark' : 'light');
+            }
+
+            // Initialise from saved preference or OS setting
+            applyTheme(savedTheme ? savedTheme === 'dark' : prefersDark);
+
+            themeToggle.addEventListener('click', () => {
+                applyTheme(!document.body.classList.contains('dark'));
+            });
         });
 
         // Add some additional markdown styling for better readability
