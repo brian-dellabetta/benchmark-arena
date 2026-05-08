@@ -9,8 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tiktoken-node@0.0.6/dist/tiktoken.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .chat-message {
@@ -398,8 +396,8 @@
         let tokenizer = null;
         async function initTokenizer() {
             try {
-                // Default to cl100k_base which is used by most recent models
-                tokenizer = await tiktoken.get_encoding("cl100k_base");
+                const { encode } = await import("https://esm.sh/gpt-tokenizer@2.1.2");
+                tokenizer = { encode };
             } catch (error) {
                 console.error('Failed to initialize tokenizer:', error);
             }
@@ -1034,8 +1032,8 @@
         }
 
         // Wait for the DOM to be fully loaded before setting up event listeners
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initTokenizer();
+        document.addEventListener('DOMContentLoaded', () => {
+            initTokenizer(); // fire-and-forget; getTokenCount() falls back gracefully if not ready
             initPerformanceChart();
 
             // Setup modal functionality
