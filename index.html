@@ -396,8 +396,8 @@
         let tokenizer = null;
         async function initTokenizer() {
             try {
-                const { encode } = await import("https://esm.sh/gpt-tokenizer@2.1.2");
-                tokenizer = { encode };
+                const { get_encoding } = await import("https://esm.sh/tiktoken@1.0.15");
+                tokenizer = get_encoding("cl100k_base");
             } catch (error) {
                 console.error('Failed to initialize tokenizer:', error);
             }
