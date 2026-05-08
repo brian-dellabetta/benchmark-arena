@@ -1,5 +1,3 @@
-
-
 Start the web server for the benchmark application with:
 ```
 python -m http.server
@@ -14,4 +12,4 @@ export CUDA_VISIBLE_DEVICES=1
 vllm serve RedHatAI/Meta-Llama-3.1-8B-Instruct-quantized.w4a16 --port 9001
 ```
 
-![image](https://github.com/user-attachments/assets/3fd87827-1387-4ffd-a602-e1babc4afe37)
+![image]([https://github.com/user-attachments/assets/3fd87827-1387-4ffd-a602-e1babc4afe37](https://github.com/user-attachments/assets/ede95bd9-b05a-4338-9a80-a23af3a9d881))
